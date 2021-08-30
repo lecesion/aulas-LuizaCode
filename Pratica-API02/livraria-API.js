@@ -13,7 +13,7 @@ var bancoDeDados = {
         genero: 'Romance contemporêneo',
         idDoAutor: 1,
         anoPubli: 2009,
-        preco: 70,
+        preco: 60,
         estado: 'Novo'
     },
     {
