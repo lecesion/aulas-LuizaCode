@@ -1,126 +1,247 @@
-let express = require('express')
-let api = express()
+const express = require("express");
+const api = express();
 
-//CONFIGURAÇÃO
-api.use(express.json())
-api.use(express.urlencoded({ extended: true }))
+api.use(express.json());
+api.use(express.urlencoded({ extended: true }));
 
-//BANCO DE DADOS
-var bancoDeDados = {
-    catalogoDeLivros: [{
-        id: 1,
-        nome: 'Sira',
-        genero: 'Romance contemporêneo',
-        idDoAutor: 1,
-        anoPubli: 2009,
-        preco: 60,
-        estado: 'Novo'
-    },
-    {
-        id: 2,
-        nome: 'Uma biografia da depressão',
-        genero: 'Psicologia',
-        idDoAutor: 2,
-        anoPubli: 2005,
-        preco: 47,
-        estado: 'Semi-novo'
-    },
-    {
-        id: 3,
-        nome: 'Ruina e Ascensão',
-        genero: 'Fantasia',
-        idDoAutor: 3,
-        nomeAutor: 'Leigh Bardugo',
-        preco: 47,
-        estado: 'Usado'
-    },
-    {
-        id: 4,
-        nome: 'Harry Potter e a Camera Secreta',
-        genero: 'Fantasia',
-        idDoAutor: 4,
-        anoPubli: 2001,
-        preco: 50,
-        estado: 'Novo'
-    },
-    {
-        id: 5,
-        nome: 'Harry Potter e a Pedra Filosofal',
-        genero: 'Fantasia',
-        idDoAutor: 4,
-        anoPubli: 2000,
-        preco: 50,
-        estado: 'Novo'
-    },
+var bandoDeDados = {
+    autores: [
+        {
+            id: 1,
+            nome: "Machado de Assis",
+            nacionalidade: "Brasileiro",
+        },
+        {
+            id: 2,
+            nome: "José de Alencar",
+            nacionalidade: "Brasileiro",
+        },
+        {
+            id: 3,
+            nome: "J. K. Rowling",
+            nacionalidade: "Britânica",
+        },
     ],
+    livros: [
+        {
+            id: 1,
+            nome: "Dom Casmurro",
+            descricao: "bla bla ble Casmurro",
+            autor: 1,
+            publicacao: 1899,
+            preco: 25,
+            estado: "Novo",
+        },
+        {
+            id: 2,
+            nome: "Memórias Póstumas de Brás Cubas.",
+            descricao: "blah blah blah",
+            autor: 1,
+            publicacao: 1881,
+            preco: 20,
+            estado: "Usado",
+        },
+        {
+            id: 3,
+            nome: "O Sertanejo.",
+            descricao: "blah blah blah",
+            autor: 2,
+            publicacao: 1875,
+            preco: 30,
+            estado: "Usado",
+        },
+        {
+            id: 4,
+            nome: "Iracema.",
+            descricao: "blah blah blah",
+            autor: 2,
+            publicacao: 1886,
+            preco: 28.5,
+            estado: "Novo",
+        },
+        {
+            id: 5,
+            nome: "Harry Potter e a Pedra Filosofal.",
+            descricao: "blah blah blah",
+            autor: 2,
+            publicacao: 1997,
+            preco: 28.5,
+            estado: "Novo",
+        },
+        {
+            id: 6,
+            nome: "Harry Potter e a Câmara Secreta.",
+            descricao: "blah blah blah",
+            autor: 2,
+            publicacao: 1998,
+            preco: 28.5,
+            estado: "Novo",
+        },
+    ],
+    usuarios: []
+};
 
-    catalogoDeAutor: [{
-        id: 1,
-        nome: 'Maria Duenas',
-        nacionalidade: 'Espanhola'
-    },
-    {
-        id: 2,
-        nome: 'Christian Dunker',
-        nacionalidade: 'Brasileiro'
-    },
-    {
-        id: 3,
-        nome: 'Leigh Bardugo',
-        nacionalidade: 'Americana'
-    },
-    {
-        id: 4,
-        nome: 'J. K. Rolling',
-        nacionalidade: 'Britanica'
-    },
-    ]
-}
+var qtdeLivros = ++bandoDeDados.livros.length
 
-//PROGRAMA
 api.listen(3000, function () {
-    console.log('Servidor está funcionando.')
-})
+    console.log("Servidor tá em pé.....");
+});
 
-//lista de livros
-api.get('/livros', (req, res) => {
-    res.json(bancoDeDados.catalogoDeLivros)
-    res.sendStatus(200)
-})
+api.get("/livros", (req, res) => {
+    let response = [];
 
-//procurar por ID
+    if (req.query.nome) {
+        for (let i = 0; i < bancoDeDados.livros.length; i++) {
+            pesquisa = req.query.nome.toLowerCase()
+            nome = bancoDeDados.livros[i].nome.toLowerCase()
+
+            if (nome.includes(pesquisa)) {
+                response.push({
+                    id: bancoDeDados.livros[i].id,
+                    nome: bancoDeDados.livros[i].nome,
+                    estado: bancoDeDados.livros[i].estado,
+                })
+            }
+        }
+    } else {
+        for (let i = 0; i < bancoDeDados.livros.length; i++) {
+            response.push({
+                id: bancoDeDados.livros[i].id,
+                nome: bancoDeDados.livros[i].nome,
+                estado: bancoDeDados.livros[i].estado,
+            })
+        }
+    }
+
+    res.json(response);
+});
+
 api.get("/livro/:id", (req, res) => {
     if (isNaN(req.params.id)) {
-        res.sendStatus(400)
+        res.sendStatus(400);
     } else {
-        var id = parseInt(req.params.id)
-        var livro = bancoDeDados.catalogoDeLivros.find((livro) => livro.id == id)
+        var id = parseInt(req.params.id);
+        var livro = bandoDeDados.livros.find((livro) => livro.id == id);
 
         if (livro == undefined) {
-            req.sendStatus(404)
-        } else {
-            req.json(livro)
-            req.sendStatus(200)
-        }
-    }
-})
-
-//procurar por título
-api.get('/livros', (req, res) => {
-    if (req.query.nome) {
-        var nome = req.query.nome
-        var livros = bancoDeDados.livros.filter((livro) => livro.nome.toLowerCase().includes(req.query.nome.toLowerCase()))
-        if (livros == undefined) {
             res.sendStatus(404);
         } else {
-            res.json(livros);
+            res.json(livro);
             res.sendStatus(200);
         }
+    }
+});
 
+api.post("/livro", (req, res) => {
+    var { nome, descricao, autor, publicacao, preco, estado } = req.body
+
+    if (nome == undefined || estado == undefined || autor == undefined) {
+        res.sendStatus(400)
     } else {
-        res.json(bancoDeDados.livros)
-        res.sendStatus(200)
-
+        let autorId = parseInt(autor)
+        let autorAchado = bandoDeDados.autores.find((autor) => autor.id == autorId)
+        if (autorAchado == undefined) {
+            res.sendStatus(404)
+        } else {
+            bandoDeDados.livros.push({
+                id: qtdeLivros,
+                nome,
+                descricao,
+                autor: autorAchado.id,
+                publicacao,
+                preco,
+                estado
+            })
+            qtdeLivros++
+            res.sendStatus(201)
+        }
     }
 })
 
+api.get("/autores", (req, res) => {
+    res.json(bancoDeDados.autores);
+});
+
+api.get("/autores/:id", (req, res) => {
+    if (isNaN(req.params.id)) {
+        res.statusCode = 404;
+        res.json({ "message": "Autor nao existe" });
+    } else {
+        var id = parseInt(req.params.id);
+        var autor = bancoDeDados.autores.find((autor) => autor.id == id);
+
+        if (autor == undefined) {
+            res.statusCode = 404;
+            res.json({ "message": "Autor nao existe" });
+        } else {
+            res.json(autor);
+            res.statusCode = 200;
+        }
+    }
+});
+
+api.get("/autores/:id/livros", (req, res) => {
+    if (isNaN(req.params.id)) {
+        res.statusCode = 404;
+        res.json({ "message": "Autor nao existe" });
+    } else {
+        var id = parseInt(req.params.id);
+        var livros = bancoDeDados.livros.filter((livro) => livro.autor == id);
+
+        if (livros == undefined || livros.length == 0) {
+            res.statusCode = 404;
+            res.json({ "message": "Autor nao existe" });
+        } else {
+            res.json(livros);
+        }
+    }
+});
+
+function enviarEmail(corpo, para) {
+    console.log("Enviando email!");
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            var deuErro = false;
+            if (!deuErro) {
+                resolve({ email: para, time: "4s" });
+            } else {
+                reject(para);
+            }
+        }, 4000)
+    });
+};
+
+api.post("/usuarios", (req, res) => {
+    var { nome, email, telefone } = req.body;
+    // Campos obrigatórios
+    if (nome == null || email == null) {
+        res.statusCode = 400;
+        res.json({ "message": "nome e email são campos obrigatorios." });
+        return;
+    }
+    // Verificando Email
+    var re = /\S+@\S+\.\S+/;
+    if (!re.test(email)) {
+        res.statusCode = 400;
+        res.json({ "message": "formato de email inválido" });
+        return;
+    }
+    var id = bancoDeDados.usuarios.length + 1
+
+    bancoDeDados.usuarios.push({
+        id: id,
+        nome,
+        email,
+        telefone,
+        status: "avaliacao",
+    });
+
+    enviarEmail("Oi, seja bem vind@!", email).then(({ email, time }) => {
+        console.log(`O email enviado para o usuário: ${id}`);
+    }).catch((email) => {
+        console.log(`Houve um erro ao enviar email para ${email}!`);
+    });
+
+    res.json({ "id": id });
+    res.statusCode = 200;
+});
